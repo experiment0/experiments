@@ -38,4 +38,4 @@
 
 Алгоритм в ходе работы нашел более лучшие параметры и нашел точку минимума.
 
-:arrow_up:[к оглавлению](https://github.com/experiment0/experiments/blob/main/gradient_descent/README.md#Оглавление)
+:arrow_up:[к оглавлению](https://github.com/experiment0/experiments/tree/master/gradient_descent#Оглавление)
