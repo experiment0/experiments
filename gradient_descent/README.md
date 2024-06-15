@@ -2,10 +2,10 @@
 
 ## Оглавление
 
-[1. Описание проекта](https://github.com/experiment0/experiments/blob/main/gradient_descent/README.md#Описание-проекта)\
-[2. Краткая информация о данных](https://github.com/experiment0/experiments/blob/main/gradient_descent/README.md#Краткая-информация-о-данных)\
-[3. Этапы работы над проектом](https://github.com/experiment0/experiments/blob/main/gradient_descent/README.md#Этапы-работы-над-проектом)\
-[4. Результат](https://github.com/experiment0/experiments/blob/main/gradient_descent/README.md#Результат)
+[1. Описание проекта](https://github.com/experiment0/experiments/tree/master/gradient_descent#Описание-проекта)\
+[2. Краткая информация о данных](https://github.com/experiment0/experiments/tree/master/gradient_descent#Краткая-информация-о-данных)\
+[3. Этапы работы над проектом](https://github.com/experiment0/experiments/tree/master/gradient_descent#Этапы-работы-над-проектом)\
+[4. Результат](https://github.com/experiment0/experiments/tree/master/gradient_descent#Результат)
 
 ## Описание проекта
 
