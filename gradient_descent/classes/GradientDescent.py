@@ -2,8 +2,8 @@ import numpy as np
 import sympy
 from sympy import *
 import matplotlib.pyplot as plt 
-
 from classes.FSM import FSM, State, Action
+
 
 class GradientDescent:
     def __init__(
