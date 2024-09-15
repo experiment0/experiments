@@ -2,10 +2,11 @@
 
 ## Оглавление
 
-[1. Описание проекта](https://github.com/experiment0/experiments/tree/master/gradient_descent#Описание-проекта)\
-[2. Краткая информация о данных](https://github.com/experiment0/experiments/tree/master/gradient_descent#Краткая-информация-о-данных)\
-[3. Этапы работы над проектом](https://github.com/experiment0/experiments/tree/master/gradient_descent#Этапы-работы-над-проектом)\
-[4. Результат](https://github.com/experiment0/experiments/tree/master/gradient_descent#Результат)
+[Описание проекта](https://github.com/experiment0/experiments/tree/master/gradient_descent#Описание-проекта)\
+[Краткая информация о данных](https://github.com/experiment0/experiments/tree/master/gradient_descent#Краткая-информация-о-данных)\
+[Этапы работы над проектом](https://github.com/experiment0/experiments/tree/master/gradient_descent#Этапы-работы-над-проектом)\
+[Описание файлов](https://github.com/experiment0/experiments/tree/master/gradient_descent#Описание-файлов)\
+[Результат](https://github.com/experiment0/experiments/tree/master/gradient_descent#Результат)
 
 ## Описание проекта
 
@@ -33,6 +34,12 @@
 - Реализован алгоритм обычного градиентного спуска
 - Добавлена логика уточнения параметров с помощью упрощенного аналога FSM
 - Произведено тестирование работы алгоритма
+
+## Описание файлов
+
+- [./index.ipynb](./index.ipynb) - здесь подключается и запускается класс для реализации градиентного спуска
+- [./classes/GradientDescent.py](./classes/GradientDescent.py) - здесь реализован класс для реализации градиентного спуска
+- [./classes/FSM.py](./classes/FSM.py) - содержит вспомогательный класс для реализации FSM
 
 ## Результат
 
