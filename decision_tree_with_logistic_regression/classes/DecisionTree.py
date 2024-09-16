@@ -33,6 +33,7 @@ class Node:
         value: Optional[Value_type]=None, 
         split_params: Optional[Split_params_type]=None, 
         impurity: Optional[float]=None,
+        weighted_impurity: Optional[float]=None,
         samples: Optional[int]=None, 
         is_leaf: bool=False
     ):
@@ -50,6 +51,8 @@ class Node:
                 По умолчанию None.
             impurity (Optional[float], optional): Значение неоднородности в вершине. 
                 По умолчанию None.
+            weighted_impurity (Optional[float], optional): Значение взвешенной неоднородности после деления вершины.
+                По умолчанию None.
             samples (Optional[int], optional): Количество объектов, попавших в вершину. 
                 По умолчанию None.
             is_leaf (bool, optional): Флаг, является ли вершина листовой. 
@@ -60,6 +63,7 @@ class Node:
         self.split_params = split_params
         self.value = value
         self.impurity = impurity
+        self.weighted_impurity = weighted_impurity
         self.samples = samples
         self.is_leaf = is_leaf
 
@@ -290,6 +294,8 @@ class DecisionTree:
                 split_params=best_split_params, 
                 # значение критерия информативности для данной вершины
                 impurity=self.criterion(y), 
+                # значение взвешенной неоднородности после деления вершины
+                weighted_impurity=self.__calculate_weighted_impurity(X, y, best_split_params),
                 # количество элементов в вершине
                 samples=y.size
             )

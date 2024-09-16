@@ -1,12 +1,12 @@
 from __future__ import annotations
 import numpy as np
 import pandas as pd 
-from typing import Union, Optional, Callable, Tuple
+from typing import Union, Optional, Tuple
 from sklearn.linear_model import LogisticRegression
 from helpers.criterions import entropy, gini
 
-
-Value_type = Union[str, int]
+# тип значения целевой переменной
+Value_type = Union[int]
 
 
 
@@ -20,6 +20,7 @@ class Node:
         log_reg_model: Optional[LogisticRegression]=None, 
         prediction: Optional[np.ndarray]=None,
         impurity: Optional[float]=None,
+        weighted_impurity: Optional[float]=None,
         samples: Optional[int]=None, 
         is_leaf: bool=False
     ):
@@ -41,6 +42,8 @@ class Node:
                 По умолчанию None.
             impurity (Optional[float], optional): Значение неоднородности в вершине. 
                 По умолчанию None.
+            weighted_impurity (Optional[float], optional): Значение взвешенной неоднородности после деления вершины.
+                По умолчанию None.
             samples (Optional[int], optional): Количество объектов, попавших в вершину. 
                 По умолчанию None.
             is_leaf (bool, optional): Флаг, является ли вершина листовой. 
@@ -52,6 +55,7 @@ class Node:
         self.prediction = prediction
         self.value = value
         self.impurity = impurity
+        self.weighted_impurity = weighted_impurity
         self.samples = samples
         self.is_leaf = is_leaf
         
@@ -65,6 +69,7 @@ class Node:
             f'value: {self.value};',
             f'samples: {self.samples};',
             f'impurity: {self.impurity}',
+            f'weighted_impurity: {self.weighted_impurity}',
         )
 
 
@@ -76,7 +81,7 @@ class DecisionTreeWithLogisticRegression:
         criterion: str = 'entropy', 
         max_depth: Optional[int]=None
     ) -> None:
-        """Реализует основные методы алгоритма дерева решений.
+        """Реализует методы алгоритма дерева решений для бинарной классификации.
            В качестве условия для разделения выборки на каждом шаге берется не предикат,
            а логистическая регрессия.
 
@@ -209,16 +214,13 @@ class DecisionTreeWithLogisticRegression:
         Returns:
             Value_type: общее предсказание для листа
         """
-        #if (y.size == 0):
-            #return None
-        
         # для классификации предсказание по выборке из листа - это мода
         value = y.mode()[0]
         return value
     
     
     def __build_decision_tree(self, X: pd.DataFrame, y: pd.Series, depth: int = 0) -> Node:
-        """Реализует рекурсивный алгоритм построения дерева решений
+        """Реализует рекурсивный алгоритм построения дерева решений для бинарной классификации
 
         Args:
             X (pd.DataFrame): данные выборки
@@ -233,11 +235,12 @@ class DecisionTreeWithLogisticRegression:
         # увеличиваем значение текущей глубины дерева
         depth += 1
         
+        # если в листе нет элементов, сделаем пустую вершину
+        if (y.size == 0):
+            node = None        
         # если выполняется критерий остановки деления дерева, формируем лист
-        if self.__stopping_criterion(X, y, depth):
-            #print('__stopping_criterion y.size', y.size)
+        elif self.__stopping_criterion(X, y, depth):
             # считаем предсказание для листа
-            
             value = self.__create_leaf_prediction(y)            
                       
             # формируем объект класса вершины дерева для листа
@@ -253,9 +256,9 @@ class DecisionTreeWithLogisticRegression:
             )
             # если НЕ выполняется критерий остановки деления дерева, производим дальнейшее деление
         else:
-            # 
+            # обучаем логистическую регрессию и формируем предсказание для данной вершины
             log_reg_model, prediction = self.__get_log_reg_model_and_prediction(X, y)
-            # 
+            # разделяем выборку по обученной логистической регрессии
             X_left, y_left, X_right, y_right = self.__split(X, y, prediction)
             # вызываем данную функцию рекурсивно и формируем левую дочернюю вершину
             left_node = self.__build_decision_tree(X_left, y_left, depth)
@@ -267,19 +270,17 @@ class DecisionTreeWithLogisticRegression:
                 left=left_node, 
                 # вершина правого потомка
                 right=right_node, 
-                # 
+                # обученная модель логистической регрессии
                 log_reg_model=log_reg_model, 
-                #
+                # предсказания, полученные по выборке из вершины с помощью обученной логистической регрессии
                 prediction=prediction,
                 # значение критерия информативности для данной вершины
                 impurity=self.criterion(y), 
+                # значение взвешенной неоднородности после деления вершины
+                weighted_impurity=self.__calculate_weighted_impurity(X, y, prediction),
                 # количество элементов в вершине
                 samples=y.size
             )
-        
-        #print('depth', depth)
-        #node.print()
-        #print('---')
         
         # возвращаем сформированную вершину,
         # это либо лист, либо корневая или промежуточная вершина с левым и правым потомками
@@ -287,7 +288,7 @@ class DecisionTreeWithLogisticRegression:
     
     
     def fit(self, X: pd.DataFrame, y: pd.Series) -> None:
-        """Строит и запоминает дерево решений для обучающей выборки
+        """Строит и запоминает дерево решений бинарной классификации для обучающей выборки
 
         Args:
             X (pd.DataFrame): данные обучающей выборки
@@ -313,8 +314,16 @@ class DecisionTreeWithLogisticRegression:
         # строка с отступом для текущего уровня дерева
         indent = ('|' + ' '*18) * (depth-1)
         
+        # если вершина пустая (формируем такую, если в нее попало 0 элементов)
+        if (node is None):
+            print(
+                indent,
+                '|--> ',
+                'None',
+                sep=''
+            )
         # если вершина является листом
-        if node.is_leaf:
+        elif node.is_leaf:
             # выводим предсказание для данного листа
             print(
                 indent, 
@@ -323,17 +332,14 @@ class DecisionTreeWithLogisticRegression:
             )
             # если вершина является коневой или внутренней
         else:
-            # выводим параметры предиката для левого потомка данной вершины
-            #print(indent, f'left: ')
-            #node.print()
             # рекурсивно вызываем текущую функцию для печати данных о левом потомке
             self.__print_decision_tree(node.left, depth=depth)
             
-            # выводим параметры предиката для правого потомка данной вершины
+            # выводим параметры потомка данной вершины
             print(indent, '|    ', f'samples: {node.samples}', sep='')
             print(indent, '|--> ', f'impurity: {node.impurity:.3f}', sep='')
             print(indent, '|    ', f'predict: {self.__create_leaf_prediction(pd.Series(node.prediction))}', sep='')
-            #node.print()
+            
             # рекурсивно вызываем текущую функцию для печати данных о правом потомке
             self.__print_decision_tree(node.right, depth=depth)
     
@@ -354,23 +360,30 @@ class DecisionTreeWithLogisticRegression:
         Returns:
             Value_type: предсказание для переданной строки из выборки
         """
-
         # если вершина является листом
-        if node.is_leaf:
+        if (node.is_leaf):
             # вернем значение, предсказанное для данного листа при обучении
             return node.value
-        # параметры разбиения вершины
-        # (номер и значение признака)
+        
+        # считаем предсказание для переданной строки в текущей вершине
         predict = node.log_reg_model.predict(x)[0]
         
         # если условие предиката для данной вершины выполняется
         if predict == 0:
-            # рекурсивно вызываем данную функцию для левого потомка
-            return self.__predict_sample(node.left, x)
-        else:
+            # если левый потомок является пустым, вернем для него предсказание родителя
+            if (node.left is None):
+                return 0
+            else:
+                # рекурсивно вызываем данную функцию для левого потомка
+                return self.__predict_sample(node.left, x)
             # если условие предиката для данной вершины НЕ выполняется,
-            # рекурсивно вызываем данную функцию для правого потомка
-            return self.__predict_sample(node.right, x)
+        else:
+            # если правый потомок является пустым, вернем для него предсказания родителя
+            if (node.right is None):
+                return 1
+            else:
+                # рекурсивно вызываем данную функцию для правого потомка
+                return self.__predict_sample(node.right, x)
 
     
     def predict(self, X: pd.DataFrame) -> np.ndarray:
