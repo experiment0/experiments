@@ -22,7 +22,9 @@ class Node:
         impurity: Optional[float]=None,
         weighted_impurity: Optional[float]=None,
         samples: Optional[int]=None, 
-        is_leaf: bool=False
+        is_leaf: bool=False,
+        X: pd.DataFrame = None,
+        y: pd.Series = None,
     ):
         """Вспомогательный класс вершины дерева решений
 
@@ -48,6 +50,9 @@ class Node:
                 По умолчанию None.
             is_leaf (bool, optional): Флаг, является ли вершина листовой. 
                 По умолчанию False.
+            X (pd.DataFrame, optional): Данные выборки в вершине для дальнейших исследований.
+                По умолчанию None.
+            y: (pd.Series, optional): Истинные значения в вершине для дальнейших исследований.
         """
         self.left = left
         self.right = right
@@ -58,6 +63,8 @@ class Node:
         self.weighted_impurity = weighted_impurity
         self.samples = samples
         self.is_leaf = is_leaf
+        self.X = X
+        self.y = y
         
     
     def print(self):
@@ -279,7 +286,9 @@ class DecisionTreeWithLogisticRegression:
                 # значение взвешенной неоднородности после деления вершины
                 weighted_impurity=self.__calculate_weighted_impurity(X, y, prediction),
                 # количество элементов в вершине
-                samples=y.size
+                samples=y.size,
+                X=X,
+                y=y,
             )
         
         # возвращаем сформированную вершину,
@@ -294,6 +303,8 @@ class DecisionTreeWithLogisticRegression:
             X (pd.DataFrame): данные обучающей выборки
             y (pd.Series): истинные значения целевой переменной для обучающей выборки
         """
+        if (type(X) == np.ndarray):
+            X = pd.DataFrame(X)
         # строим дерево решений
         decision_tree = self.__build_decision_tree(X, y)
         
@@ -395,6 +406,8 @@ class DecisionTreeWithLogisticRegression:
         Returns:
             np.ndarray: предсказания для переданной выборки
         """
+        if (type(X) == np.ndarray):
+            X = pd.DataFrame(X)
         # формируем список предсказаний для каждой строки из выборки
         predictions = [self.__predict_sample(self.decision_tree, [row.values]) for index, row in X.iterrows()]
         # возвращаем массив для предсказаний
